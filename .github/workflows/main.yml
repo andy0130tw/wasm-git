@@ -1,9 +1,9 @@
 name: CI
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    branches: [ master, '@qbane/dev' ]
+  # pull_request:
+  #   branches: [ master ]
 jobs:
   detectonly:
     name: Detect use of .only
@@ -30,7 +30,7 @@ jobs:
           cd ..
           source ./emsdk/emsdk_env.sh
           cd emscriptenbuild
-          ./build.sh Release
+          ./build.sh Debug
           cd ..
           set -e
           npm run test
@@ -42,6 +42,10 @@ jobs:
           echo "run browser tests with npm package"
           cp package/lg2.* test-browser/
           npm run test-browser
+      - uses: actions/upload-artifact@v2
+        with:
+          name: wasm-git-dist
+          path: '*.tgz'
   asyncify:
     name: Asyncify
     runs-on: ubuntu-latest
@@ -58,7 +62,13 @@ jobs:
           cd ..
           source ./emsdk/emsdk_env.sh
           cd emscriptenbuild
-          ./build.sh Release-async
+          ./build.sh Debug-async
           cd ..
           set -e
           npm run test-browser-async
+          ./preparepublishnpm.sh  
+          PACKAGEFILE=`npm pack | tail -n 1`
+      - uses: actions/upload-artifact@v2
+        with:
+          name: wasm-git-dist-asyncify
+          path: '*.tgz'
