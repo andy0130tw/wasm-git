@@ -32,11 +32,14 @@ fi
 [ -f "../libgit2/src/libgit2/transports/emscriptenhttp-async.c" ] && rm ../libgit2/src/libgit2/transports/emscriptenhttp-async.c
 
 emcmake cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
-  -DCMAKE_C_FLAGS=" \
-    $EXTRA_CMAKE_C_FLAGS \
+  -DCMAKE_C_FLAGS="$EXTRA_CMAKE_C_FLAGS" \
+  -DCMAKE_EXE_LINKER_FLAGS=" \
     --pre-js $(pwd)/pre.js $POST_JS \
-    -s \"EXTRA_EXPORTED_RUNTIME_METHODS=['FS','callMain']\" \
-    -lnodefs.js -lidbfs.js \
+    -s \"EXPORTED_RUNTIME_METHODS=['FS','MEMFS','JSFILEFS','MEMFS','wasmFS\$JSMemoryFiles','wasmFS\$backends','callMain']\" \
+    -s MODULARIZE -s EXPORT_ES6 \
+    -s FORCE_FILESYSTEM=1 \
+    -sWASMFS -ljsfilefs.js \
+    -lnodefs.js  \
     -s INVOKE_RUN=0 \
     -s ALLOW_MEMORY_GROWTH=1 -s STACK_SIZE=131072" \
   -DREGEX_BACKEND=regcomp \
