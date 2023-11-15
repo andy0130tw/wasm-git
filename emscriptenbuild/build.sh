@@ -18,13 +18,14 @@ if [ "$1" == "Release-async" ]; then
     BUILD_TYPE=Release
     cp ../libgit2patchedfiles/src/transports/emscriptenhttp-async.c ../libgit2/src/libgit2/transports/emscriptenhttp.c
 
-    EXTRA_CMAKE_C_FLAGS="-O3 $ASYNCIFY_FLAGS"
+    EXTRA_CMAKE_C_FLAGS="-O3"
+    EXTRA_CMAKE_EXE_LINKER_FLAGS="$ASYNCIFY_FLAGS"
     POST_JS="--post-js $(pwd)/post-async.js"
 elif [ "$1" == "Debug-async" ]; then
     BUILD_TYPE=Debug
     cp ../libgit2patchedfiles/src/transports/emscriptenhttp-async.c ../libgit2/src/libgit2/transports/emscriptenhttp.c
 
-    EXTRA_CMAKE_C_FLAGS="$ASYNCIFY_FLAGS"
+    EXTRA_CMAKE_EXE_LINKER_FLAGS="$ASYNCIFY_FLAGS"
     POST_JS="--post-js $(pwd)/post-async.js"
 fi
 
@@ -34,9 +35,9 @@ fi
 emcmake cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
   -DCMAKE_C_FLAGS="$EXTRA_CMAKE_C_FLAGS" \
   -DCMAKE_EXE_LINKER_FLAGS=" \
+    $EXTRA_CMAKE_EXE_LINKER_FLAGS \
     --pre-js $(pwd)/pre.js $POST_JS \
     -s \"EXPORTED_RUNTIME_METHODS=['FS','MEMFS','JSFILEFS','MEMFS','wasmFS\$JSMemoryFiles','wasmFS\$backends','callMain']\" \
-    -s MODULARIZE -s EXPORT_ES6 \
     -s FORCE_FILESYSTEM=1 \
     -sWASMFS -ljsfilefs.js \
     -lnodefs.js  \
@@ -51,5 +52,7 @@ emcmake cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
   -DBUILD_CLAR=OFF \
   -DBUILD_EXAMPLES=ON \
   ../libgit2
+
+# -s MODULARIZE -s EXPORT_ES6 \
 
 emmake make lg2
